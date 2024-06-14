@@ -1,4 +1,4 @@
-package com.example.pichka5051;
+package com.example.cinemaApplication;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @RestController
-public class Pichka5051Application {
+public class CinemaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Pichka5051Application.class, args);
+        SpringApplication.run(CinemaApplication.class, args);
     }
 
     @GetMapping("/hello")
