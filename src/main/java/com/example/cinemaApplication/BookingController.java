@@ -17,7 +17,7 @@ public class BookingController {
     }
     @GetMapping("/Bookings/{id}")
     Optional<Booking> ticket_id(@PathVariable Long id){
-        return repository.findById(id);
+         return repository.findById(id);
     }
     @PostMapping("/Bookings")
     String create(@RequestBody Booking booking) {
@@ -25,7 +25,7 @@ public class BookingController {
         return "Бронь готова";
     }
     @PatchMapping("/Bookings/{id}")
-    String edit(@PathVariable Long id, @RequestBody Booking booking) {
+        String edit(@PathVariable Long id, @RequestBody Booking booking) {
         var bookingbid = repository.findById(id);
         if(bookingbid.isEmpty()){
             return "Заказчик не найден";
@@ -33,7 +33,7 @@ public class BookingController {
         if((booking.getCustomer() == null)){
             return "Введите имя заказчика :<";
         }
-        bookingbid.get().setCustomer(booking.getCustomer());
+        bookingbid.get().setCustomer(booking.getCustomer(), booking.getMovie(), booking.getHall(), booking.getLine(),booking.getPlace(), booking.getDate());
         repository.save(bookingbid.get());
         return "Customer обновлён";
     }

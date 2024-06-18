@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>API Web Interface</title>
+    <style>
+        td {
+            padding: 5px;
+        }
+
+        button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<h2>Брони в кино</h2>
+<div>
+    <input type="hidden" id="ticket_id" />
+    <p>
+        Ф.И.О:<br />
+        <input id="customer" />
+    </p>
+    <p>
+        Фильм:<br />
+        <input id="movie" />
+    </p>
+    <p>
+        Зал:<br />
+        <input id="hall" type="number" />
+    </p>
+    <p>
+        Ряд:<br />
+        <input id="line" type="number" />
+    </p>
+    <p>
+        Место:<br />
+        <input id="place" type="number" />
+    </p>
+    <p>
+        Дата:<br />
+        <input id="date" type="date"/>
+    </p>
+
+    <p>
+        <button id="saveBtn">Сохранить</button>
+        <button id="resetBtn">Сбросить</button>
+    </p>
+</div>
+<table>
+    <thead><tr><th>Заказчик</th><th>Фильм</th><th>Зал</th><th>Ряд</th><th>Место</th><th>Дата</th></tr></thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+
+    async function getUsers() {
+        const response = await fetch("/Bookings", {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+        if (response.ok === true) {
+            const users = await response.json();
+            const rows = document.querySelector("tbody");
+            users.forEach(user => rows.append(row(user)));
+        }
+    }
+    async function getUser(ticket_id) {
+        const response = await fetch(`/Bookings/${ticket_id}`, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+        if (response.ok === true) {
+            const user = await response.json();
+            document.getElementById("ticket_id").value = user.ticket_id;
+            document.getElementById("customer").value = user.customer;
+            document.getElementById("movie").value = user.movie;
+            document.getElementById("hall").value = user.hall;
+            document.getElementById("line").value = user.line;
+            document.getElementById("place").value = user.place;
+            document.getElementById("date").value = user.date;
+        }
+        else {
+            const error = await response.json();
+            console.log(error.message);
+        }
+    }
+    async function createUser(userName, UserMovie, UserHall, userLine, userPlace, userDate) {
+
+        const response = await fetch("/Bookings", {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({
+                customer: userName,
+                movie: UserMovie,
+                hall: UserHall,
+                line: userLine,
+                place: userPlace,
+                date: userDate
+            })
+        });
+        if (response.ok === true) {
+            const user = await response.json();
+            document.querySelector("tbody").append(row(user));
+        }
+        else {
+            const error = await response.json();
+            console.log(error.message);
+        }
+    }
+    async function editUser(ticket_id,userName, UserMovie, UserHall, userLine, userPlace, userDate) {
+        console.log(JSON.stringify({
+            customer: userName,
+            movie: UserMovie,
+            hall: UserHall,
+            line: userLine,
+            place: userPlace,
+            date: userDate
+        }))
+        const response = await fetch(`/Bookings/${ticket_id}`, {
+            method: "PATCH",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({
+                customer: userName,
+                movie: UserMovie,
+                hall: UserHall,
+                line: userLine,
+                place: userPlace,
+                date: userDate
+            })
+        });console.log(response)
+        if (response.ok === true) {
+            const user = await response.json();
+            if (document.querySelector(`tr[data-rowid='${user.ticket_id}']`)) {
+                document.querySelector(`tr[data-rowid='${user.ticket_id}']`).replaceWith(row(user));
+            }
+        } else {
+            const error = await response.text();
+            console.error(error);
+        }
+    }
+
+
+    async function deleteUser(ticket_id) {
+        const response = await fetch(`/Bookings/${ticket_id}`, {
+            method: "DELETE",
+            headers: { "Accept": "application/json" }
+        });
+        if (response.ok === true) {
+            const userRow = document.querySelector(`tr[data-rowid='${ticket_id}']`);
+            if (userRow) {
+                userRow.remove();
+            }
+            getUsers();
+        }
+        else {
+            const error = await response.json();
+            console.log(error.message);
+        }
+    }
+    function reset() {
+        document.getElementById("ticket_id").value =
+            document.getElementById("customer").value =
+                document.getElementById("movie").value =
+                    document.getElementById("hall").value =
+                        document.getElementById("line").value =
+                            document.getElementById("place").value =
+                                document.getElementById("date").value = "";
+    }
+    function row(user) {
+
+        const tr = document.createElement("tr");
+        tr.setAttribute("data-rowid", user.tick);
+
+        const customerTd = document.createElement("td");
+        customerTd.append(user.customer);
+        tr.append(customerTd);
+
+        const moveTd = document.createElement("td");
+        moveTd.append(user.movie);
+        tr.append(moveTd);
+
+        const hallTd = document.createElement("td");
+        hallTd.append(user.hall);
+        tr.append(hallTd);
+
+        const lineTd = document.createElement("td");
+        lineTd.append(user.line);
+        tr.append(lineTd);
+
+        const placeTd = document.createElement("td");
+        placeTd.append(user.place);
+        tr.append(placeTd);
+
+        const dateTd = document.createElement("td");
+        dateTd.append(user.date);
+        tr.append(dateTd);
+
+
+        const linksTd = document.createElement("td");
+
+        const editLink = document.createElement("button");
+        editLink.append("Изменить");
+        editLink.addEventListener("click", async() => await getUser(user.ticket_id));
+        linksTd.append(editLink);
+
+        const removeLink = document.createElement("button");
+        removeLink.append("Удалить");
+        removeLink.addEventListener("click", async () => await deleteUser(user.ticket_id));
+
+        linksTd.append(removeLink);
+        tr.appendChild(linksTd);
+
+        return tr;
+    }
+    document.getElementById("resetBtn").addEventListener("click", () =>  reset());
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        const ticket_id = document.getElementById("ticket_id").value;
+        const customer = document.getElementById("customer").value;
+        const  movie = document.getElementById("movie").value;
+        const hall = document.getElementById("hall").value;
+        const line = document.getElementById("line").value;
+        const place = document.getElementById("place").value;
+        const date = document.getElementById("date").value;
+        if (ticket_id === "")
+            await createUser(customer, movie, hall ,line, place, date);
+        else
+            await editUser(ticket_id, customer, movie, hall ,line, place, date);
+        reset();
+    });
+
+    getUsers();
+</script>
+</body>
+</html>

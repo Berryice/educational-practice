@@ -29,8 +29,13 @@ public class Booking {
         return customer;
     }
 
-    public void setCustomer(String customer) {
+    public void setCustomer(String customer, String movie, int hall, int line, int place,String date) {
         this.customer = customer;
+        this.movie = movie;
+        this.hall = hall;
+        this.line = line;
+        this.place = place;
+        this.date = date;
     }
 
     public String getMovie() {
@@ -77,9 +82,9 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ticket_id;
     private String customer;
-    private  String movie;
+    private String movie;
     private int hall;
-    private  int line;
+    private int line;
     private int place;
     private String date;
 
